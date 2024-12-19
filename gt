@@ -36,11 +36,6 @@ Options:
 }
 
 __gt_normal() {
-  # need to eval because find command expands to:
-  # find 'dir1 dir2 dir3'
-  # instead of
-  # find dir1 dir2 dir3
-  # if not eval'd
   GT_TARGET=$(
   (
     echo $GT_SEARCH_DIRS | tr ':' '\n' && \
@@ -61,11 +56,6 @@ __gt_fast() {
     echo "WARN: 'fd' is not installed. used 'find'"
     return
   fi
-  # need to eval because fd command expands to:
-  # fd 'dir1 dir2 dir3'
-  # instead of
-  # fd dir1 dir2 dir3
-  # if not eval'd
   GT_TARGET=$(
   (
     echo "$GT_SEARCH_DIRS" | tr ':' '\n' && \
