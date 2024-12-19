@@ -12,12 +12,17 @@ Various scripts to find local git repositories, let user fuzzy select, and cd to
 4. Use [fzf](https://github.com/junegunn/fzf) to display results and let user fuzzy choose
 5. `cd` to chosen directory
 
+# Supported Shells
+- Any shell that can execute a `#!/bin/sh` script
+- pwsh
+
 # Usage
+## Various Linux and Mac shells
+Invoke by sourcing the script. Needs source to be able to `cd` to the chosen directory
 ```bash
-source path/to/gt
+source /path/to/gt
 ```
-Needs source to be able to `cd` to the chosen directory. In zsh for example, you can just make an
-alias or a keybind.
+Example alias and keybind in zsh:
 ```zsh
 # alias
 alias gt="source /path/to/gt"
@@ -30,11 +35,24 @@ __gt_integ() {
 zle -N __gt_integ
 bindkey '^F' __gt_integ
 ```
-
-# Supported Shells
-- Any shell that can execute a `#!/bin/sh` script
-- pwsh
-
+## Windows pwsh
+Make sure you set your execution policy accordingly.
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+Then invoke the script as is.
+```powershell
+\path\to\gt
+```
+Example keybind setup:
+```powershell
+# keybind
+function __gtInteg()
+{
+    \path\to\gt.ps1
+}
+Set-PSReadLineKeyHandler -Key "Ctrl+f" -ScriptBlock { __gtInteg }
+```
 
 # Requirements
 ## Requried for all
