@@ -1,0 +1,87 @@
+#!/bin/sh
+
+GT_VERSION="0.0.1-dev"
+: "${GT_SEARCH_DIRS:="$HOME/projects/:$HOME/work/:$HOME/.config/"}"
+
+__gt_main() {
+  if ! command -v fzf > /dev/null; then
+    echo "ERROR: 'fzf' is not installed"
+  elif [ $# -eq 0 ]; then
+    __gt_normal
+  elif [ "$1" = "-f" ] || [ "$1" = "--fast" ]; then
+    __gt_fast
+  elif [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
+    echo $GT_VERSION
+  elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    __gt_help
+  else
+    echo "ERROR: Unknown option: $1"
+    __gt_help
+  fi
+  __gt_clean
+}
+
+__gt_help() {
+  echo '
+gt finds local git repos and cd to whichever one is fuzzy selected.
+It uses the colon separated $GT_SEARCH_DIRS to search for git repos
+
+Usage: gt [option]
+Options:
+                 leave empty to use "find"
+-f | --fast      uses "fd" instead, with "find" as the fallback
+-h | --help      prints this help message
+-v | --version   prints the version
+'
+}
+
+__gt_normal() {
+  # need to eval because find command expands to:
+  # find 'dir1 dir2 dir3'
+  # instead of
+  # find dir1 dir2 dir3
+  # if not eval'd
+  GT_TARGET=$(
+  (
+    echo $GT_SEARCH_DIRS | tr ':' '\n' && \
+    stdbuf -o0 find $(echo $GT_SEARCH_DIRS | tr ':' ' ') -maxdepth 4 -type d -path "*.git" \
+    | sed -u 's/\.git//' \
+  ) | fzf) 2> /dev/null
+  if [ $GT_TARGET ] ; then
+    cd $GT_TARGET
+  else
+    echo "No directory selected"
+  fi
+}
+
+__gt_fast() {
+  # Check if fd is installed
+  if ! command -v fd > /dev/null; then
+    __gt_normal
+    echo "WARN: 'fd' is not installed. used 'find'"
+    return
+  fi
+  # need to eval because fd command expands to:
+  # fd 'dir1 dir2 dir3'
+  # instead of
+  # fd dir1 dir2 dir3
+  # if not eval'd
+  GT_TARGET=$(
+  (
+    echo "$GT_SEARCH_DIRS" | tr ':' '\n' && \
+    fd -HIat d -d 4 \.git$ $(echo $GT_SEARCH_DIRS | tr ':' ' ') \
+    | sed -u 's/\.git\///' \
+  ) | fzf) 2> /dev/null
+  if [ $GT_TARGET ] ; then
+    cd $GT_TARGET
+  else
+    echo "No directory selected"
+  fi
+}
+
+__gt_clean() {
+  unset GT_TARGET
+  unset GT_TEMP_DIRS
+}
+
+__gt_main "$@"
