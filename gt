@@ -3,6 +3,7 @@
 GT_VERSION="0.0.1-dev"
 : "${GT_SEARCH_DIRS:="$HOME/projects/:$HOME/work/:$HOME/.config/"}"
 
+
 __gt_main() {
   if ! command -v fzf > /dev/null; then
     echo "ERROR: 'fzf' is not installed"
@@ -39,7 +40,7 @@ __gt_normal() {
   GT_TARGET=$(
   (
     echo $GT_SEARCH_DIRS | tr ':' '\n' && \
-    stdbuf -o0 find $(echo $GT_SEARCH_DIRS | tr ':' ' ') -maxdepth 4 -type d -path "*.git" \
+    stdbuf -o0 find -L $(echo $GT_SEARCH_DIRS | tr ':' ' ') -maxdepth 4 -path "*.git" \
     | sed -u 's/\.git//' \
   ) | fzf) 2> /dev/null
   if [ $GT_TARGET ] ; then
@@ -59,8 +60,8 @@ __gt_fast() {
   GT_TARGET=$(
   (
     echo "$GT_SEARCH_DIRS" | tr ':' '\n' && \
-    fd -HIat d -d 4 \.git$ $(echo $GT_SEARCH_DIRS | tr ':' ' ') \
-    | sed -u 's/\.git\///' \
+    fd -HILad4 "\.git$" $(echo $GT_SEARCH_DIRS | tr ':' ' ') \
+    | sed -u 's/\.git\/\?//' \
   ) | fzf) 2> /dev/null
   if [ $GT_TARGET ] ; then
     cd $GT_TARGET
