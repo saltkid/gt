@@ -68,8 +68,8 @@ Set-PSReadLineKeyHandler -Key "Ctrl+f" -ScriptBlock { __gtInteg }
     - Default is `$HOME/projects/:$HOME/work/:$HOME/.config/`
         - `%USERPROFILE%\projects\;%USERPROFILE\work\;%USERPROFILE\.config\` for windows
     - dirs are colon separated (semi-colon on windows because of drives being included in paths)
-2. Find all `.git/` under dirs in `GT_SEARCH_DIRS`
-3. Use [sed](https://www.gnu.org/software/sed/) to trim `.git/` from all found paths
+2. Find all `.git/` dirs (`.git` files for gitmodules) under dirs in `GT_SEARCH_DIRS`
+3. Use [sed](https://www.gnu.org/software/sed/) to trim `.git/` or `.git` from all found paths
     - powershell uses its own trimmer
 4. Use [fzf](https://github.com/junegunn/fzf) to display results and let user fuzzy choose
 5. `cd` to chosen directory
