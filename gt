@@ -5,8 +5,10 @@ GT_VERSION="0.0.1-dev"
 
 
 __gt_main() {
+  local __gt_exitcode=0
   if ! command -v fzf > /dev/null; then
     echo "ERROR: 'fzf' is not installed"
+    __gt_exitcode=1
   elif [ $# -eq 0 ]; then
     __gt_normal
   elif [ "$1" = "-f" ] || [ "$1" = "--fast" ]; then
@@ -20,6 +22,7 @@ __gt_main() {
     __gt_help
   fi
   __gt_clean
+  return __gt_exitcode
 }
 
 __gt_help() {
@@ -76,3 +79,10 @@ __gt_clean() {
 }
 
 __gt_main "$@"
+__gt_exitcode=$?
+unhash -f __gt_main
+unhash -f __gt_help
+unhash -f __gt_normal
+unhash -f __gt_fast
+unhash -f __gt_clean
+return $__gt_exitcode

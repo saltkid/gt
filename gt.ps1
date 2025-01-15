@@ -16,9 +16,11 @@ if (-not $env:gt_SEARCH_DIRS)
 
 function __gtMain
 {
+    $exitcode = 0
     if (-not (Get-Command "fzf" -ErrorAction SilentlyContinue))
     {
         Write-Host "ERROR: 'fzf' is not installed"
+        $exitcode = 1
     } elseif ($help -or $h)
     {
         __gthelp
@@ -36,6 +38,7 @@ function __gtMain
         Write-Host "ERROR: Unknown option"
         __gthelp
     }
+    return $exitcode
 }
 
 function __gtHelp
@@ -46,8 +49,8 @@ Uses the semi-colon separated $env:GT_SEARCH_DIRS to search for git repos
 
 Usage: gt [option]
 Options:
-                 leave empty to use "find"
--f | --fast      uses "fd" instead, with "find" as the fallback
+                 leave empty to use "Get-ChildItem"
+-f | --fast      uses "es" instead
 -h | --help      prints this help message
 -v | --version   prints the version
 '
@@ -74,7 +77,7 @@ function __gtNormal
 function __gtFast
 {
     # es is the fastest (once set up) so we're not using fd on windows
-    $selected = $(es -w .git /a[DH] | sed 's/\\.git//' | fzf)
+    $selected = $(es -w .git /a[DH] | ForEach-Object { $_ -replace '\\.git', '' } | fzf)
     if ($selected)
     {
         Set-Location $selected
@@ -83,4 +86,5 @@ function __gtFast
     [System.Windows.Forms.SendKeys]::SendWait("{Enter}")
 }
 
-__gtMain
+exit __gtMain
+_gtMain
