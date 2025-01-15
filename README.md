@@ -1,32 +1,18 @@
 # gt
 Various scripts to find local git repositories, let user fuzzy select, and cd to the result. 
 
+# Table of Contents
+- [Supported Shells](#supported-shells)
+- [Usage](#usage)
+- [Requirements](#requirements)
+- [How it works](#how-it-works)
+
 # Supported Shells
-- Any shell that can execute a `#!/bin/sh` script
+- POSIX-compliant shells
 - pwsh
 
-# Requirements
-## Requried for all
-- [fzf](https://github.com/junegunn/fzf)
-    - used to display found git repos and let user choose directory to `cd` to
-
-## Optional for Linux and Mac
-- [fd](https://github.com/sharkdp/fd)
-    - faster alternative to [find](https://www.gnu.org/software/findutils/)
-    - has unbuffered output like [find](https://www.gnu.org/software/findutils/) with `stdbuf -o0`,
-    which means it can stream results directly to [sed](https://www.gnu.org/software/sed/) as they
-    are found.
-        - [sd](https://github.com/chmln/sd) currently does not support unbuffered output so sadly,
-        it cannot be used as a faster alternative here. A [pr](https://github.com/chmln/sd/pull/287)
-        is up though
-
-## Optional for Windows
-- [es (Everything CLI)](https://www.voidtools.com/downloads/#cli)
-    - faster than [fd](https://github.com/sharkdp/fd). well, that's because es uses a db so
-    obviously it will be faster _once db is set up_
-
 # Usage
-## Various Linux and Mac shells
+## POSIX-compliant shells
 Invoke by sourcing the script. Needs source to be able to `cd` to the chosen directory
 ```bash
 source /path/to/gt
@@ -39,12 +25,17 @@ alias gt="source /path/to/gt"
 # keybind
 __gt_integ() {
   source /path/to/gt
-  zle accept-line
+  zle accept-line # to reset prompt.
+                  # can also just use "zle reset-prompt" but that does fully
+                  # reset multi level prompts (in p10k) in my experience
 }
 zle -N __gt_integ
 bindkey '^F' __gt_integ
 ```
-## Windows pwsh
+> [!Note]
+> While the example alias does propagate `gt`'s exit code, the keybind does not
+
+## pwsh
 Make sure you set your execution policy accordingly.
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -62,6 +53,26 @@ function __gtInteg()
 }
 Set-PSReadLineKeyHandler -Key "Ctrl+f" -ScriptBlock { __gtInteg }
 ```
+
+# Requirements
+## Requried for all
+- [fzf](https://github.com/junegunn/fzf) to display found git repos and let user choose directory to `cd` to
+
+## Requried for posix-compliant shells
+- [sed](https://www.gnu.org/software/sed/) for trimming `.git/` or `.git` from all found git repos
+
+## Optional for posix-compliant shells
+- [fd](https://github.com/sharkdp/fd) as a faster alternative to
+[find](https://www.gnu.org/software/findutils/)
+    - has unbuffered output like [find](https://www.gnu.org/software/findutils/)
+    that's used with `stdbuf -o0`, which means it can stream results directly to
+    [sed](https://www.gnu.org/software/sed/) as they are found.
+
+## Optional for pwsh
+- [es (Everything CLI)](https://www.voidtools.com/downloads/#cli) is even
+faster than [fd](https://github.com/sharkdp/fd).
+    - well, that's because es uses a db so obviously it will be faster _once db
+    is set up_
 
 # How it works
 1. Looks for a `GT_SEARCH_DIRS` env var and assigns defaults if not found
